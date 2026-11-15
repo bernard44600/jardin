@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendrier des plantations</title>
+  <style>
+    :root {
+      --bg: #f6f7f2;
+      --surface: #ffffff;
+      --surface-alt: #f0f3eb;
+      --border: #dce2d4;
+      --text: #1f2a22;
+      --text-muted: #5c6b60;
+      --primary: #2f6f4e;
+      --primary-hover: #24573d;
+      --primary-soft: #e3f0e8;
+      --accent-semis: #d8ecf8;
+      --accent-semis-text: #145374;
+      --accent-plant: #dff2df;
+      --accent-plant-text: #1e5b2a;
+      --accent-recolte: #fde6dc;
+      --accent-recolte-text: #8c2d19;
+      --star: #e09f1f;
+      --current-month: rgba(47, 111, 78, 0.09);
+      --current-month-head: #1f4f37;
+      --danger: #b43c2d;
+      --danger-soft: #fbeae7;
+      --shadow: 0 2px 10px rgba(25, 40, 28, 0.08);
+      --radius: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .app-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.3rem;
+      color: var(--primary);
+    }
+
+    .source-badge {
+      font-size: 0.8rem;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .btn:hover {
+      background: var(--surface-alt);
+      border-color: #bcc7b0;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    .btn-fav-active {
+      background: #fff7df;
+      border-color: var(--star);
+      color: #7c5300;
+    }
+
+    .container {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 16px 20px 40px;
+    }
+
+    .loader-panel {
+      max-width: 640px;
+      margin: 40px auto;
+      background: var(--surface);
+      border: 2px dashed var(--border);
+      border-radius: 14px;
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .loader-panel.drag-over {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .loader-panel h2 {
+      margin-top: 0;
+      font-size: 1.25rem;
+    }
+
+    .loader-panel p {
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .shared-banner {
+      background: #fff8e6;
+      border: 1px solid #f0d084;
+      color: #6b4900;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      margin-bottom: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.9rem;
+    }
+
+    /* ═════════ Zone des filtres densifiée ═════════ */
+    .controls-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+    }
+
+    .field-search {
+      margin-bottom: 8px;
+    }
+
+    .filters-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+
+    .filters-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .filters-row > select {
+      flex: 1;
+      min-width: 130px;
+    }
+
+    .field-search input,
+    .filters-row select {
+      width: 100%;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: #e6e8e6;
+      color: var(--text);
+      font-size: 0.9rem;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .field-search input.is-active,
+    .filters-row select.is-active {
+      background: var(--primary-soft);
+      border-color: var(--primary);
+    }
+
+    .field-search input:focus,
+    .filters-row select:focus {
+      outline: 2px solid rgba(47, 111, 78, 0.25);
+      border-color: var(--primary);
+    }
+
+    .count-badge {
+      font-weight: 600;
+      color: var(--primary);
+      font-size: 0.85rem;
+    }
+
+    /* ═════════ Tableau et colonnes compactées ═════════ */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow-x: auto;
+      max-height: 75vh;
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.85rem;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      background: #274434;
+      color: #fff;
+      font-weight: 600;
+      padding: 9px 6px;
+      text-align: center;
+      border-bottom: 2px solid #1a2f24;
+      border-right: 1px solid rgba(255, 255, 255, 0.12);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    thead th.sortable {
+      cursor: pointer;
+    }
+
+    thead th.sortable:hover {
+      background: #315642;
+    }
+
+    thead th.current-month {
+      background: var(--current-month-head);
+      box-shadow: inset 0 -3px 0 #8bd4a6;
+    }
+
+    thead th.col-plant {
+      text-align: left;
+      padding-left: 10px;
+      min-width: 210px;
+    }
+
+    .sort-arrow {
+      font-size: 0.72rem;
+      margin-left: 3px;
+      opacity: 0.85;
+    }
+
+    tbody tr {
+      transition: background 0.1s;
+      cursor: pointer;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #fafbf8;
+    }
+
+    tbody tr:hover {
+      background: #edf4ee;
+    }
+
+    tbody td {
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid #ecefe6;
+      padding: 5px 4px;
+      vertical-align: middle;
+      text-align: center;
+    }
+
+    tbody td.current-month {
+      background: var(--current-month);
+    }
+
+    tbody td.col-fav {
+      width: 38px;
+      padding: 4px;
+    }
+
+    .fav-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.25rem;
+      line-height: 1;
+      padding: 4px;
+      color: #b7c1b3;
+      border-radius: 6px;
+      transition: transform 0.12s, color 0.12s;
+    }
+
+    .fav-btn:hover {
+      transform: scale(1.15);
+      color: var(--star);
+    }
+
+    .fav-btn.is-fav {
+      color: var(--star);
+    }
+
+    td.col-plant {
+      text-align: left;
+      padding: 6px 10px;
+    }
+
+    .plant-title-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .plant-name-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+      font: inherit;
+      font-weight: 700;
+      font-size: 0.94rem;
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .plant-name-btn:hover {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .tag-perpetuel {
+      background: #e3f3ea;
+      border-color: #a9d5bc;
+      color: #1e5c3a;
+      font-weight: 600;
+    }
+
+    .plant-sub {
+      font-size: 0.77rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .obs-icon {
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    .obs-icon:hover {
+      transform: scale(1.15);
+    }
+
+    .col-meta {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      padding: 4px 6px;
+    }
+
+    .col-needs {
+      font-size: 0.8rem;
+      white-space: nowrap;
+      padding: 4px 5px;
+    }
+
+    /* Mois compactés */
+    thead th.col-month {
+      padding: 5px 2px;
+      font-size: 0.75rem;
+    }
+    .col-month {
+      width: 22px;
+      min-width: 20px;
+      padding: 2px 1px;
+    }
+
+    .month-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      align-items: center;
+    }
+
+    .slot {
+      width: 18px;
+      height: 15px;
+      border-radius: 3px;
+      font-size: 0.65rem;
+      line-height: 15px;
+      text-align: center;
+    }
+
+    .slot-empty {
+      opacity: 0.12;
+    }
+
+    .slot-semis { background: var(--accent-semis); }
+    .slot-plant { background: var(--accent-plant); }
+    .slot-recolte { background: var(--accent-recolte); }
+
+    .col-durations {
+      font-size: 0.74rem;
+      text-align: left;
+      padding: 4px 8px;
+      white-space: nowrap;
+      color: var(--text-muted);
+    }
+
+    .dur-line {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-height: 17px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+
+    /* Modal */
+    dialog.plant-modal {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0;
+      width: min(680px, 94vw);
+      max-height: 88vh;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.22);
+      color: var(--text);
+      background: var(--surface);
+    }
+
+    dialog.plant-modal::backdrop {
+      background: rgba(15, 25, 18, 0.45);
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-head {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--surface-alt);
+    }
+
+    .modal-title-group h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .modal-subtitle {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .modal-body {
+      padding: 12px 16px 14px;
+      overflow-y: auto;
+      max-height: calc(90vh - 64px);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .modal-section {
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 8px 11px;
+    }
+
+    .modal-section h3 {
+      margin: 0 0 6px;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .kv-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px 10px;
+    }
+
+    .kv-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px 10px;
+    }
+
+    .kv-item strong {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.2;
+    }
+
+    .kv-item span,
+    .kv-item div {
+      font-size: 0.86rem;
+      line-height: 1.25;
+    }
+
+    .cal-mini {
+      display: grid;
+      grid-template-columns: 74px repeat(12, 1fr);
+      gap: 2px;
+      font-size: 0.72rem;
+      align-items: center;
+    }
+
+    .cal-mini-head {
+      text-align: center;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding-bottom: 2px;
+    }
+
+    .cal-mini-cell {
+      height: 19px;
+      border-radius: 4px;
+      background: #f2f4ee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .badge-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .badge-friend {
+      background: var(--accent-plant);
+      color: var(--accent-plant-text);
+      border: 1px solid #b8e0bf;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+    }
+
+    .badge-enemy {
+      background: var(--danger-soft);
+      color: var(--danger);
+      border: 1px solid #efc2bb;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+    }
+
+    button.badge-friend,
+    button.badge-enemy {
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    button.badge-friend:hover,
+    button.badge-enemy:hover {
+      filter: brightness(0.95);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #1f2a22;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(10px);
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 50;
+      max-width: calc(100vw - 40px);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 760px) {
+      .hide-sm {
+        display: none;
+      }
+      .app-header {
+        padding: 10px 10px;
+        gap: 8px;
+      }
+      .brand {
+        width: 100%;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .brand h1 {
+        font-size: 1.08rem;
+      }
+      .header-actions {
+        width: 100%;
+        flex-wrap: nowrap;
+        gap: 6px;
+      }
+      .header-actions .btn {
+        flex: 1 1 0;
+        justify-content: center;
+        padding: 6px 6px;
+        font-size: 0.78rem;
+        white-space: nowrap;
+        min-width: 0;
+      }
+      .container {
+        padding: 8px 8px 24px;
+      }
+      .controls-card {
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+      .field-search input,
+      .filters-row select {
+        padding: 5px 7px;
+        font-size: 0.84rem;
+      }
+      thead th.col-plant {
+        min-width: 155px;
+      }
+      dialog.plant-modal {
+        width: 96vw;
+        max-width: 96vw;
+        max-height: 94vh;
+      }
+      .modal-head {
+        padding: 9px 11px;
+        gap: 6px;
+      }
+      .modal-title-group h2 {
+        font-size: 1.02rem;
+      }
+      .modal-subtitle {
+        font-size: 0.74rem;
+      }
+      .modal-head .btn {
+        padding: 5px 8px;
+        font-size: 0.78rem;
+      }
+      .modal-body {
+        padding: 8px 10px 10px;
+        gap: 6px;
+        max-height: calc(94vh - 54px);
+      }
+      .modal-section {
+        padding: 6px 8px;
+      }
+      .modal-section h3 {
+        font-size: 0.68rem;
+        margin-bottom: 4px;
+      }
+      .cal-mini {
+        grid-template-columns: 58px repeat(12, 1fr);
+        gap: 1.5px;
+        font-size: 0.66rem;
+      }
+      .cal-mini-cell {
+        height: 17px;
+        font-size: 0.66rem;
+      }
+      .kv-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 5px 6px;
+      }
+      .kv-grid-2 {
+        gap: 5px 8px;
+      }
+      .kv-item strong {
+        font-size: 0.64rem;
+      }
+      .kv-item span,
+      .kv-item div {
+        font-size: 0.76rem;
+      }
+      .badge-friend,
+      .badge-enemy {
+        font-size: 0.74rem;
+        padding: 2px 7px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <h1>🌱 Calendrier des plantations</h1>
+      <span id="sourceBadge" class="source-badge hidden"></span>
+    </div>
+    <div class="header-actions">
+      <button id="toggleFavFilterBtn" class="btn hidden" type="button" title="Afficher uniquement mes favoris">
+        ☆ <span class="hide-sm">Mes </span>favoris (<span id="favCount">0</span>)
+      </button>
+      <button id="shareFavBtn" class="btn hidden" type="button" title="Copier un lien avec mes favoris">
+        🔗 Partager<span class="hide-sm"> favoris</span>
+      </button>
+      <label class="btn" for="csvFileInput" title="Charger un fichier CSV depuis votre appareil">
+        📂 Ouvrir<span class="hide-sm"> un</span> CSV
+      </label>
+      <input id="csvFileInput" type="file" accept=".csv,text/csv" class="hidden">
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="loaderPanel" class="loader-panel hidden">
+      <h2>📂 Charger le fichier de plantations</h2>
+      <p id="loaderMessage">
+        Sélectionnez votre fichier CSV (ou glissez-le ici) pour afficher le calendrier interactif.
+      </p>
+      <label class="btn btn-primary" for="csvFileInput">
+        Choisir un fichier CSV
+      </label>
+    </section>
+
+    <section id="sharedBanner" class="shared-banner hidden">
+      <span id="sharedBannerText"></span>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button id="importSharedBtn" class="btn btn-primary" type="button">★ Ajouter à mes favoris</button>
+        <button id="exitSharedBtn" class="btn" type="button">Revenir à ma vue</button>
+      </div>
+    </section>
+
+    <!-- App Interactive -->
+    <div id="appContent" class="hidden">
+      <!-- Zone des filtres densifiée -->
+      <section class="controls-card">
+
+        <!-- Recherche globale -->
+        <div class="field-search">
+          <input id="searchInput" type="search" placeholder="Recherche: Nom, famille, notes, culture...">
+        </div>
+
+        <!-- Ligne 1 : Mois + Action + Classement + Bouton Tout -->
+        <div class="filters-row">
+          <select id="monthFilter">
+            <option value="">Mois (Tous)</option>
+            <option value="current">Ce mois-ci</option>
+          </select>
+
+          <select id="actionFilter">
+            <option value="">Action (Toutes)</option>
+            <option value="semis">🪴 Semis intérieur</option>
+            <option value="plantation">🌱 Plantation / Semis ext.</option>
+            <option value="recolte">🍅 Récolte</option>
+          </select>
+
+          <select id="classFilter">
+            <option value="">Classement (Tous)</option>
+          </select>
+
+          <button id="resetFiltersBtn" class="btn btn-primary" type="button" style="padding: 7px 16px; flex-shrink: 0;" title="Réinitialiser les filtres">
+            Tout
+          </button>
+        </div>
+
+        <!-- Ligne 2 : Famille + Particularité -->
+        <div class="filters-row">
+          <select id="familyFilter">
+            <option value="">Famille (Toutes)</option>
+          </select>
+
+          <select id="cultureFilter">
+            <option value="">Particularité (Toutes)</option>
+            <option value="perpetuel">Perpétuel / Vivace</option>
+            <option value="precoce">Précoce / Primeur</option>
+            <option value="tardif">Tardif</option>
+          </select>
+
+          <!-- Compteur aligné à droite sur la 2ème ligne -->
+          <span id="resultCount" class="count-badge" style="margin-left: auto;"></span>
+        </div>
+
+      </section>
+
+      <div class="table-wrap">
+        <table id="calendarTable">
+          <thead>
+            <tr id="tableHeadRow"></tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <dialog id="plantModal" class="plant-modal">
+    <div class="modal-head">
+      <div class="modal-title-group">
+        <h2 id="modalTitle"></h2>
+        <div id="modalSubtitle" class="modal-subtitle"></div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button id="modalFavBtn" class="btn" type="button"></button>
+        <button id="modalCloseBtn" class="btn" type="button" aria-label="Fermer">✕</button>
+      </div>
+    </div>
+    <div id="modalBody" class="modal-body"></div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const MONTHS_SHORT = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+      const MONTHS_CODES = ["Jan", "Fev", "Mar", "Avr", "Mai", "Juin", "Juil", "Aou", "Sep", "Oct", "Nov", "Dec"];
+      const MONTHS_FULL = [
+        "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+      ];
+
+      const MONTH_ALIASES = {
+        jan: 0, janvier: 0,
+        fev: 1, fevr: 1, fevrier: 1,
+        mar: 2, mars: 2,
+        avr: 3, avril: 3,
+        mai: 4,
+        juin: 5,
+        juil: 6, juillet: 6,
+        aou: 7, aout: 7,
+        sep: 8, sept: 8, septembre: 8,
+        oct: 9, octobre: 9,
+        nov: 10, novembre: 10,
+        dec: 11, decembre: 11
+      };
+
+      const state = {
+        plants: [],
+        sourceName: "plantes.csv",
+        favorites: new Set(),
+        sharedFavorites: null,
+        onlyFavorites: false,
+        sortKey: "nom",
+        sortDir: "asc",
+        currentMonthIndex: new Date().getMonth()
+      };
+
+      const el = {
+        sourceBadge: document.getElementById("sourceBadge"),
+        toggleFavFilterBtn: document.getElementById("toggleFavFilterBtn"),
+        shareFavBtn: document.getElementById("shareFavBtn"),
+        csvFileInput: document.getElementById("csvFileInput"),
+        loaderPanel: document.getElementById("loaderPanel"),
+        loaderMessage: document.getElementById("loaderMessage"),
+        sharedBanner: document.getElementById("sharedBanner"),
+        sharedBannerText: document.getElementById("sharedBannerText"),
+        importSharedBtn: document.getElementById("importSharedBtn"),
+        exitSharedBtn: document.getElementById("exitSharedBtn"),
+        appContent: document.getElementById("appContent"),
+        searchInput: document.getElementById("searchInput"),
+        monthFilter: document.getElementById("monthFilter"),
+        actionFilter: document.getElementById("actionFilter"),
+        familyFilter: document.getElementById("familyFilter"),
+        classFilter: document.getElementById("classFilter"),
+        cultureFilter: document.getElementById("cultureFilter"),
+        resetFiltersBtn: document.getElementById("resetFiltersBtn"),
+        resultCount: document.getElementById("resultCount"),
+        tableHeadRow: document.getElementById("tableHeadRow"),
+        tableBody: document.getElementById("tableBody"),
+        plantModal: document.getElementById("plantModal"),
+        modalTitle: document.getElementById("modalTitle"),
+        modalSubtitle: document.getElementById("modalSubtitle"),
+        modalFavBtn: document.getElementById("modalFavBtn"),
+        modalCloseBtn: document.getElementById("modalCloseBtn"),
+        modalBody: document.getElementById("modalBody"),
+        toast: document.getElementById("toast")
+      };
+
+      function stripAccents(str) {
+        return String(str || "")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+      }
+
+      function normKey(str) {
+        return stripAccents(str).trim().toLowerCase();
+      }
+
+      function escapeHtml(str) {
+        return String(str ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function isSafeHttpUrl(url) {
+        try {
+          const u = new URL(url.trim());
+          return u.protocol === "http:" || u.protocol === "https:";
+        } catch {
+          return false;
+        }
+      }
+
+      function extractNumber(val) {
+        if (val === null || val === undefined) return null;
+        const cleaned = String(val).replace(",", ".").trim();
+        const match = cleaned.match(/-?\d+(?:\.\d+)?/);
+        return match ? parseFloat(match[0]) : null;
+      }
+
+      function showToast(msg, duration = 2600) {
+        el.toast.innerHTML = msg; // Changed to innerHTML to allow line breaks
+        el.toast.classList.add("show");
+        clearTimeout(showToast._timer);
+        showToast._timer = setTimeout(() => el.toast.classList.remove("show"), duration);
+      }
+
+      function detectDelimiter(firstLine) {
+        const semiCount = (firstLine.match(/;/g) || []).length;
+        const commaCount = (firstLine.match(/,/g) || []).length;
+        return semiCount >= commaCount ? ";" : ",";
+      }
+
+      function parseCsv(text) {
+        const cleanText = text.replace(/^\uFEFF/, "");
+        const firstBreak = cleanText.search(/\r?\n/);
+        const firstLine = firstBreak === -1 ? cleanText : cleanText.slice(0, firstBreak);
+        const delimiter = detectDelimiter(firstLine);
+
+        const rows = [];
+        let row = [];
+        let field = "";
+        let inQuotes = false;
+
+        for (let i = 0; i < cleanText.length; i++) {
+          const ch = cleanText[i];
+          const next = cleanText[i + 1];
+
+          if (inQuotes) {
+            if (ch === '"' && next === '"') {
+              field += '"';
+              i++;
+            } else if (ch === '"') {
+              inQuotes = false;
+            } else {
+              field += ch;
+            }
+          } else {
+            if (ch === '"') {
+              inQuotes = true;
+            } else if (ch === delimiter) {
+              row.push(field.trim());
+              field = "";
+            } else if (ch === "\r" && next === "\n") {
+              row.push(field.trim());
+              rows.push(row);
+              row = [];
+              field = "";
+              i++;
+            } else if (ch === "\n" || ch === "\r") {
+              row.push(field.trim());
+              rows.push(row);
+              row = [];
+              field = "";
+            } else {
+              field += ch;
+            }
+          }
+        }
+
+        if (field.length > 0 || row.length > 0) {
+          row.push(field.trim());
+          rows.push(row);
+        }
+
+        const nonEmptyRows = rows.filter(r => r.some(cell => cell !== ""));
+        if (nonEmptyRows.length < 2) return [];
+
+        const headers = nonEmptyRows[0].map(h => normKey(h));
+
+        const getField = (obj, ...aliases) => {
+          for (const alias of aliases) {
+            const k = normKey(alias);
+            if (obj[k] !== undefined && obj[k] !== "") return obj[k];
+          }
+          return "";
+        };
+
+        return nonEmptyRows.slice(1).map((cells, idx) => {
+          const raw = {};
+          headers.forEach((h, i) => {
+            if (h) raw[h] = cells[i] ?? "";
+          });
+
+          const nom = getField(raw, "nom");
+          const culture = getField(raw, "culture");
+          const id = getField(raw, "id") || `${nom}_${culture}_${idx + 1}`;
+
+          const plant = {
+            id,
+            nom,
+            famille: getField(raw, "famille"),
+            type: getField(raw, "type"),
+            classement: getField(raw, "classement"),
+            variete: getField(raw, "variete", "variété"),
+            culture,
+            lien_wikipedia: getField(raw, "lien_wikipedia", "wikipedia"),
+            germination: getField(raw, "germination"),
+            espacement: getField(raw, "espacement"),
+            recolte: getField(raw, "recolte", "récolte"),
+            semis_interieur: getField(raw, "semis_interieur"),
+            plantation: getField(raw, "plantation"),
+            periode_recolte: getField(raw, "periode_recolte"),
+            besoins_eau: getField(raw, "besoins_eau", "eau"),
+            besoins_nutriments: getField(raw, "besoins_nutriments", "nutriments"),
+            besoins_soleil: getField(raw, "besoins_soleil", "soleil"),
+            gelif: getField(raw, "gelif", "gélif", "rusticite"),
+            manger: getField(raw, "manger"),
+            amies: getField(raw, "amies", "plantes_amies"),
+            ennemies: getField(raw, "ennemies", "enemies", "plantes_ennemies"),
+            observations: getField(raw, "observations", "observation", "notes"),
+            articles: getField(raw, "articles", "article", "liens")
+          };
+
+          plant._months = {
+            semis: parseMonthSet(plant.semis_interieur),
+            plantation: parseMonthSet(plant.plantation),
+            recolte: parseMonthSet(plant.periode_recolte)
+          };
+
+          plant._search = normKey([
+            plant.nom, plant.famille, plant.type, plant.classement,
+            plant.variete, plant.culture, plant.manger, plant.gelif,
+            plant.observations
+          ].join(" "));
+
+          return plant;
+        }).filter(p => p.nom !== "");
+      }
+
+      function parseMonthSet(str) {
+        const set = new Set();
+        if (!str) return set;
+        str.split(/[,;/]+/).forEach(tok => {
+          const key = normKey(tok);
+          if (MONTH_ALIASES[key] !== undefined) {
+            set.add(MONTH_ALIASES[key]);
+          }
+        });
+        return set;
+      }
+
+      function favStorageKey() {
+        return `jardincal_favs::${state.sourceName}`;
+      }
+
+      function loadFavorites() {
+        state.favorites = new Set();
+        try {
+          const raw = localStorage.getItem(favStorageKey());
+          if (raw) {
+            const arr = JSON.parse(raw);
+            if (Array.isArray(arr)) {
+              arr.forEach(id => state.favorites.add(String(id)));
+            }
+          }
+        } catch {}
+      }
+
+      function saveFavorites() {
+        try {
+          localStorage.setItem(favStorageKey(), JSON.stringify([...state.favorites]));
+        } catch {}
+      }
+
+      function activeFavSet() {
+        return state.sharedFavorites || state.favorites;
+      }
+
+      function toggleFavorite(id) {
+        const key = String(id);
+        if (state.sharedFavorites) {
+          if (state.sharedFavorites.has(key)) state.sharedFavorites.delete(key);
+          else state.sharedFavorites.add(key);
+        } else {
+          if (state.favorites.has(key)) state.favorites.delete(key);
+          else state.favorites.add(key);
+          saveFavorites();
+        }
+        updateFavControls();
+        renderRows();
+      }
+
+      function updateFavControls() {
+        const count = activeFavSet().size;
+        const countEl = document.getElementById("favCount");
+        if (countEl) countEl.textContent = String(count);
+
+        el.toggleFavFilterBtn.classList.toggle("btn-fav-active", state.onlyFavorites);
+        el.toggleFavFilterBtn.innerHTML = `${state.onlyFavorites ? "★" : "☆"} <span class="hide-sm">Mes </span>favoris (<span id="favCount">${count}</span>)`;
+      }
+
+      function resolveCsvTargetFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const paramFile = params.get("csv") || params.get("file");
+        if (!paramFile) {
+          return { target: "plantes.csv", fromParam: false, invalid: false };
+        }
+
+        const trimmed = paramFile.trim();
+        if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed) || trimmed.startsWith("//")) {
+          return { target: "plantes.csv", fromParam: true, invalid: true, requested: trimmed };
+        }
+
+        if (window.location.protocol === "http:" || window.location.protocol === "https:") {
+          try {
+            const resolved = new URL(trimmed, window.location.href);
+            if (resolved.origin !== window.location.origin) {
+              return { target: "plantes.csv", fromParam: true, invalid: true, requested: trimmed };
+            }
+          } catch {
+            return { target: "plantes.csv", fromParam: true, invalid: true, requested: trimmed };
+          }
+        }
+
+        return { target: trimmed, fromParam: true, invalid: false };
+      }
+
+      function checkSharedFavoritesInUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const favParam = params.get("fav");
+        if (!favParam) return;
+        const ids = favParam.split(",").map(s => s.trim()).filter(Boolean);
+        if (ids.length === 0) return;
+
+        state.sharedFavorites = new Set(ids);
+        state.onlyFavorites = true;
+        el.sharedBannerText.textContent = `⭐ Sélection partagée active (${ids.length} plante${ids.length > 1 ? "s" : ""}).`;
+        el.sharedBanner.classList.remove("hidden");
+      }
+
+      function populateDynamicFilters() {
+        const monthSel = el.monthFilter;
+        if (monthSel.options.length <= 2) {
+          MONTHS_FULL.forEach((m, idx) => {
+            const opt = document.createElement("option");
+            opt.value = String(idx);
+            opt.textContent = m;
+            monthSel.appendChild(opt);
+          });
+          monthSel.options[1].textContent = `Ce mois-ci (${MONTHS_FULL[state.currentMonthIndex]})`;
+        }
+
+        const families = [...new Set(state.plants.map(p => p.famille).filter(Boolean))]
+          .sort((a, b) => a.localeCompare(b, "fr"));
+        el.familyFilter.innerHTML = `<option value="">Famille (Toutes)</option>` +
+          families.map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join("");
+
+        const classes = [...new Set(state.plants.map(p => p.classement).filter(Boolean))]
+          .sort((a, b) => a.localeCompare(b, "fr"));
+        el.classFilter.innerHTML = `<option value="">Classement (Tous)</option>` +
+          classes.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+      }
+
+      function getFilteredPlants() {
+        const q = normKey(el.searchInput.value);
+        const monthVal = el.monthFilter.value;
+        const monthIdx = monthVal === "current"
+          ? state.currentMonthIndex
+          : (monthVal !== "" ? parseInt(monthVal, 10) : null);
+        const actionVal = el.actionFilter.value;
+        const familyVal = el.familyFilter.value;
+        const classVal = el.classFilter.value;
+        const cultureVal = el.cultureFilter.value;
+        const favSet = activeFavSet();
+
+        return state.plants.filter(p => {
+          if (state.onlyFavorites && !favSet.has(String(p.id))) return false;
+          if (q && !p._search.includes(q)) return false;
+          if (familyVal && p.famille !== familyVal) return false;
+          if (classVal && p.classement !== classVal) return false;
+
+          if (cultureVal) {
+            const cText = normKey(`${p.culture} ${p.gelif}`);
+            if (cultureVal === "perpetuel") {
+              if (!cText.includes("perpetuel") && !cText.includes("vivace") && !cText.includes("persistant")) return false;
+            } else if (cultureVal === "precoce") {
+              if (!cText.includes("precoce") && !cText.includes("primeur")) return false;
+            } else if (!cText.includes(cultureVal)) {
+              return false;
+            }
+          }
+
+          if (monthIdx !== null) {
+            if (actionVal === "semis" && !p._months.semis.has(monthIdx)) return false;
+            if (actionVal === "plantation" && !p._months.plantation.has(monthIdx)) return false;
+            if (actionVal === "recolte" && !p._months.recolte.has(monthIdx)) return false;
+            if (!actionVal && !p._months.semis.has(monthIdx) && !p._months.plantation.has(monthIdx) && !p._months.recolte.has(monthIdx)) {
+              return false;
+            }
+          } else if (actionVal) {
+            if (p._months[actionVal].size === 0) return false;
+          }
+
+          return true;
+        });
+      }
+
+      function sortPlants(list) {
+        const dir = state.sortDir === "asc" ? 1 : -1;
+        const key = state.sortKey;
+        const favSet = activeFavSet();
+
+        return [...list].sort((a, b) => {
+          if (key === "fav") {
+            const fa = favSet.has(String(a.id)) ? 1 : 0;
+            const fb = favSet.has(String(b.id)) ? 1 : 0;
+            if (fa !== fb) return (fb - fa) * dir;
+            return a.nom.localeCompare(b.nom, "fr");
+          }
+
+          if (["besoins_eau", "besoins_nutriments", "besoins_soleil", "recolte", "germination", "espacement"].includes(key)) {
+            const na = extractNumber(a[key]);
+            const nb = extractNumber(b[key]);
+            if (na === null && nb === null) return a.nom.localeCompare(b.nom, "fr");
+            if (na === null) return 1;
+            if (nb === null) return -1;
+            if (na !== nb) return (na - nb) * dir;
+            return a.nom.localeCompare(b.nom, "fr");
+          }
+
+          if (key === "gelif") {
+            const na = extractNumber(a.gelif);
+            const nb = extractNumber(b.gelif);
+            if (na !== null && nb !== null && na !== nb) return (na - nb) * dir;
+            const sa = a.gelif || "";
+            const sb = b.gelif || "";
+            if (!sa && !sb) return a.nom.localeCompare(b.nom, "fr");
+            if (!sa) return 1;
+            if (!sb) return -1;
+            return sa.localeCompare(sb, "fr") * dir;
+          }
+
+          const sa = a[key] || "";
+          const sb = b[key] || "";
+          if (!sa && !sb) return a.nom.localeCompare(b.nom, "fr");
+          if (!sa) return 1;
+          if (!sb) return -1;
+          const cmp = sa.localeCompare(sb, "fr");
+          return cmp !== 0 ? cmp * dir : a.nom.localeCompare(b.nom, "fr");
+        });
+      }
+
+      function renderTableHead() {
+        const arrow = key => state.sortKey === key ? `<span class="sort-arrow">${state.sortDir === "asc" ? "▲" : "▼"}</span>` : "";
+
+        let html = `<th class="sortable" data-sort="fav" title="Trier par favoris">★${arrow("fav")}</th>`;
+        html += `<th class="sortable col-plant" data-sort="nom" title="Trier par nom">Plante${arrow("nom")}</th>`;
+
+        // Colonnes mois placées entre "Plante" et "Famille"
+        MONTHS_SHORT.forEach((m, idx) => {
+          const isCur = idx === state.currentMonthIndex;
+          html += `<th class="col-month ${isCur ? "current-month" : ""}" title="${MONTHS_FULL[idx]}">${m}</th>`;
+        });
+
+        html += `<th class="sortable" data-sort="famille" title="Trier par famille">Famille${arrow("famille")}</th>`;
+        html += `<th class="sortable" data-sort="besoins_eau" title="Trier par besoin en eau">💧${arrow("besoins_eau")}</th>`;
+        html += `<th class="sortable" data-sort="besoins_nutriments" title="Trier par besoin en nutriments">⚡${arrow("besoins_nutriments")}</th>`;
+        html += `<th class="sortable" data-sort="besoins_soleil" title="Trier par besoin en soleil">☀️${arrow("besoins_soleil")}</th>`;
+        html += `<th class="sortable" data-sort="gelif" title="Trier par rusticité / gélif">❄️${arrow("gelif")}</th>`;
+        html += `<th class="sortable" data-sort="recolte" title="Trier par durée avant récolte">Délais / Écart${arrow("recolte")}</th>`;
+
+        el.tableHeadRow.innerHTML = html;
+
+        el.tableHeadRow.querySelectorAll("th.sortable").forEach(th => {
+          th.addEventListener("click", () => {
+            const key = th.dataset.sort;
+            if (state.sortKey === key) {
+              state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+            } else {
+              state.sortKey = key;
+              state.sortDir = "asc";
+            }
+            renderTableHead();
+            renderRows();
+          });
+        });
+      }
+
+      function renderNeedIcons(countStr, icon) {
+        const n = parseInt(countStr, 10);
+        if (!n || n <= 0) return `<span style="opacity:.25">–</span>`;
+        return `<span title="${n}">${icon.repeat(Math.min(n, 5))}</span>`;
+      }
+
+      function updateActiveStyles() {
+        [el.searchInput, el.monthFilter, el.actionFilter, el.familyFilter, el.classFilter, el.cultureFilter].forEach(ctrl => {
+          if (ctrl.value !== "") {
+            ctrl.classList.add("is-active");
+          } else {
+            ctrl.classList.remove("is-active");
+          }
+        });
+      }
+
+      function renderRows() {
+        const filtered = sortPlants(getFilteredPlants());
+        const favSet = activeFavSet();
+        el.resultCount.textContent = `${filtered.length} / ${state.plants.length} plantes`;
+
+        updateActiveStyles();
+
+        if (filtered.length === 0) {
+          el.tableBody.innerHTML = `<tr><td colspan="20" class="empty-state">Aucune plante ne correspond aux filtres sélectionnés.</td></tr>`;
+          return;
+        }
+
+        const rowsHtml = filtered.map(p => {
+          const isFav = favSet.has(String(p.id));
+          const isPerp = normKey(`${p.culture} ${p.gelif}`).includes("perpetuel");
+
+          const badges = [];
+          if (p.culture) {
+            badges.push(`<span class="tag ${isPerp ? "tag-perpetuel" : ""}">${escapeHtml(p.culture)}</span>`);
+          }
+          if (p.variete && p.variete !== "V") {
+            badges.push(`<span class="tag">${escapeHtml(p.variete)}</span>`);
+          }
+
+          const subParts = [];
+          if (p.classement) subParts.push(escapeHtml(p.classement));
+          if (p.type && p.type !== p.classement) subParts.push(escapeHtml(p.type));
+
+          // L'icône observation a un écouteur d'événement au lieu de s'ouvrir sur le survol
+          if (p.observations) {
+            const obsSafe = escapeHtml(p.observations).replace(/\n/g, '<br>');
+            subParts.push(`<span class="obs-icon" data-obs="${obsSafe}">📝</span>`);
+          }
+
+          if (p.amies || p.ennemies) subParts.push(`<span title="Associations renseignées">🤝</span>`);
+          if (isSafeHttpUrl(p.lien_wikipedia)) {
+            subParts.push(`<a href="${escapeHtml(p.lien_wikipedia)}" target="_blank" rel="noopener noreferrer" title="Wikipédia">🌐</a>`);
+          }
+
+          let monthsHtml = "";
+          for (let m = 0; m < 12; m++) {
+            const isCur = m === state.currentMonthIndex;
+            const s = p._months.semis.has(m);
+            const pl = p._months.plantation.has(m);
+            const r = p._months.recolte.has(m);
+            monthsHtml += `
+              <td class="col-month ${isCur ? "current-month" : ""}">
+                <div class="month-stack">
+                  <span class="slot ${s ? "slot-semis" : "slot-empty"}" title="${s ? `Semis intérieur (${MONTHS_FULL[m]})` : ""}">${s ? "🪴" : "·"}</span>
+                  <span class="slot ${pl ? "slot-plant" : "slot-empty"}" title="${pl ? `Plantation / Semis ext. (${MONTHS_FULL[m]})` : ""}">${pl ? "🌱" : "·"}</span>
+                  <span class="slot ${r ? "slot-recolte" : "slot-empty"}" title="${r ? `Récolte (${MONTHS_FULL[m]})` : ""}">${r ? "🍅" : "·"}</span>
+                </div>
+              </td>
+            `;
+          }
+
+          return `
+            <tr data-id="${escapeHtml(p.id)}">
+              <td class="col-fav">
+                <button class="fav-btn ${isFav ? "is-fav" : ""}" data-fav-id="${escapeHtml(p.id)}" type="button" title="${isFav ? "Retirer des favoris" : "Ajouter aux favoris"}">
+                  ${isFav ? "★" : "☆"}
+                </button>
+              </td>
+              <td class="col-plant">
+                <div class="plant-title-row">
+                  <button class="plant-name-btn" data-open-id="${escapeHtml(p.id)}" type="button">${escapeHtml(p.nom)}</button>
+                  ${badges.join("")}
+                </div>
+                <div class="plant-sub">${subParts.join(" · ")}</div>
+              </td>
+              ${monthsHtml}
+              <td class="col-meta">${p.famille ? escapeHtml(p.famille) : `<span style="opacity:.3">–</span>`}</td>
+              <td class="col-needs">${renderNeedIcons(p.besoins_eau, "💧")}</td>
+              <td class="col-needs">${renderNeedIcons(p.besoins_nutriments, "⚡")}</td>
+              <td class="col-needs">${renderNeedIcons(p.besoins_soleil, "☀️")}</td>
+              <td class="col-meta">${p.gelif ? escapeHtml(p.gelif) : `<span style="opacity:.3">–</span>`}</td>
+              <td class="col-durations">
+                <div class="dur-line">🪴 ${p.germination ? escapeHtml(p.germination) : "–"}</div>
+                <div class="dur-line">🌱 ${p.espacement ? escapeHtml(p.espacement) : "–"}</div>
+                <div class="dur-line">🍅 ${p.recolte ? escapeHtml(p.recolte) : "–"}</div>
+              </td>
+            </tr>
+          `;
+        }).join("");
+
+        el.tableBody.innerHTML = rowsHtml;
+
+        el.tableBody.querySelectorAll("[data-fav-id]").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            toggleFavorite(btn.dataset.favId);
+          });
+        });
+
+        // Ajout de l'événement clic sur les icônes d'observation
+        el.tableBody.querySelectorAll(".obs-icon").forEach(icon => {
+          icon.addEventListener("click", (e) => {
+            e.stopPropagation(); // Évite d'ouvrir la modale de la plante complète
+            const obsText = icon.dataset.obs;
+            showToast(`<strong>Notes :</strong><br>${obsText}`, 5000);
+          });
+        });
+
+        el.tableBody.querySelectorAll("tr[data-id]").forEach(tr => {
+          tr.addEventListener("click", (e) => {
+            if (e.target.closest("[data-fav-id], .obs-icon, a")) return;
+            openPlantModal(tr.dataset.id);
+          });
+        });
+      }
+
+      function findPlantByName(name) {
+        const target = normKey(name);
+        return state.plants.find(p => normKey(p.nom) === target) ||
+          state.plants.find(p => normKey(p.nom).includes(target));
+      }
+
+      function renderCompanionBadges(rawText, badgeClass) {
+        if (!rawText) return `<span style="color:var(--text-muted)">–</span>`;
+        const items = rawText.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+        return `<div class="badge-list">${items.map(item => {
+          const match = findPlantByName(item);
+          if (match) {
+            return `<button type="button" class="${badgeClass}" data-jump-id="${escapeHtml(match.id)}" title="Ouvrir la fiche de ${escapeHtml(match.nom)}">${escapeHtml(item)} ↗</button>`;
+          }
+          return `<span class="${badgeClass}">${escapeHtml(item)}</span>`;
+        }).join("")}</div>`;
+      }
+
+      function renderArticles(rawText) {
+        if (!rawText) return `<span style="color:var(--text-muted)">–</span>`;
+        const tokens = rawText.split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
+        return tokens.map(tok => {
+          if (isSafeHttpUrl(tok)) {
+            return `<div><a href="${escapeHtml(tok)}" target="_blank" rel="noopener noreferrer">🔗 ${escapeHtml(tok)}</a></div>`;
+          }
+          return `<div>${escapeHtml(tok)}</div>`;
+        }).join("");
+      }
+
+      function openPlantModal(id) {
+        const p = state.plants.find(x => String(x.id) === String(id));
+        if (!p) return;
+
+        const updateModalFav = () => {
+          const isFav = activeFavSet().has(String(p.id));
+          el.modalFavBtn.className = `btn ${isFav ? "btn-fav-active" : ""}`;
+          el.modalFavBtn.innerHTML = isFav
+            ? `★ <span class="hide-sm">Favori</span>`
+            : `☆ <span class="hide-sm">Favori</span>`;
+        };
+
+        el.modalTitle.innerHTML = `${escapeHtml(p.nom)} ${p.culture ? `<span class="tag">${escapeHtml(p.culture)}</span>` : ""}`;
+        const sub = [p.famille, p.classement, p.type, p.variete && p.variete !== "V" ? `Var. ${p.variete}` : ""]
+          .filter(Boolean)
+          .join(" · ");
+        el.modalSubtitle.textContent = sub || `ID #${p.id}`;
+        updateModalFav();
+
+        el.modalFavBtn.onclick = () => {
+          toggleFavorite(p.id);
+          updateModalFav();
+        };
+
+        const renderCalRow = (label, set, slotClass, icon) => {
+          let cells = `<div><strong>${label}</strong></div>`;
+          for (let m = 0; m < 12; m++) {
+            const active = set.has(m);
+            cells += `<div class="cal-mini-cell ${active ? slotClass : ""}" title="${MONTHS_FULL[m]}">${active ? icon : ""}</div>`;
+          }
+          return cells;
+        };
+
+        const wikiHtml = isSafeHttpUrl(p.lien_wikipedia)
+          ? `<a href="${escapeHtml(p.lien_wikipedia)}" target="_blank" rel="noopener noreferrer">🌐 Wikipédia</a>`
+          : `<span style="color:var(--text-muted)">–</span>`;
+
+        const formatNeed = (val, icon) => {
+          const n = parseInt(val, 10);
+          if (!n || n <= 0) return "–";
+          return `<span title="${escapeHtml(val)}/5">${icon.repeat(Math.min(5, n))}</span>`;
+        };
+
+        el.modalBody.innerHTML = `
+          <div class="modal-section">
+            <h3>Calendrier</h3>
+            <div class="cal-mini">
+              <div></div>
+              ${MONTHS_SHORT.map((m, i) => `<div class="cal-mini-head" title="${MONTHS_FULL[i]}">${m}</div>`).join("")}
+              ${renderCalRow("🪴 Semis", p._months.semis, "slot-semis", "🪴")}
+              ${renderCalRow("🌱 Plant.", p._months.plantation, "slot-plant", "🌱")}
+              ${renderCalRow("🍅 Réc.", p._months.recolte, "slot-recolte", "🍅")}
+            </div>
+          </div>
+
+          <div class="modal-section">
+            <h3>Repères &amp; Besoins</h3>
+            <div class="kv-grid">
+              <div class="kv-item"><strong>Germination</strong><span>${escapeHtml(p.germination || "–")}</span></div>
+              <div class="kv-item"><strong>Espacement</strong><span>${escapeHtml(p.espacement || "–")}</span></div>
+              <div class="kv-item"><strong>Récolte</strong><span>${escapeHtml(p.recolte || "–")}</span></div>
+              <div class="kv-item"><strong>Eau</strong><span>${formatNeed(p.besoins_eau, "💧")}</span></div>
+              <div class="kv-item"><strong>Nutriments</strong><span>${formatNeed(p.besoins_nutriments, "⚡")}</span></div>
+              <div class="kv-item"><strong>Soleil</strong><span>${formatNeed(p.besoins_soleil, "☀️")}</span></div>
+              <div class="kv-item"><strong>Gélif / Gel</strong><span>${escapeHtml(p.gelif || "–")}</span></div>
+              <div class="kv-item"><strong>Consommé</strong><span>${escapeHtml(p.manger || "–")}</span></div>
+              <div class="kv-item"><strong>Lien</strong><span>${wikiHtml}</span></div>
+            </div>
+          </div>
+
+          <div class="modal-section">
+            <h3>Associations</h3>
+            <div class="kv-grid-2">
+              <div class="kv-item">
+                <strong>Amies</strong>
+                ${renderCompanionBadges(p.amies, "badge-friend")}
+              </div>
+              <div class="kv-item">
+                <strong>Ennemies</strong>
+                ${renderCompanionBadges(p.ennemies, "badge-enemy")}
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-section">
+            <h3>Observations &amp; Articles</h3>
+            <div class="kv-grid-2">
+              <div class="kv-item">
+                <strong>Observations</strong>
+                <div>${p.observations ? escapeHtml(p.observations).replace(/\n/g, "<br>") : `<span style="color:var(--text-muted)">–</span>`}</div>
+              </div>
+              <div class="kv-item">
+                <strong>Articles</strong>
+                <div>${p.articles ? renderArticles(p.articles) : `<span style="color:var(--text-muted)">–</span>`}</div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        el.modalBody.querySelectorAll("[data-jump-id]").forEach(btn => {
+          btn.addEventListener("click", () => openPlantModal(btn.dataset.jumpId));
+        });
+
+        if (!el.plantModal.open) {
+          el.plantModal.showModal();
+        }
+      }
+
+      function loadCsvContent(csvText, sourceLabel) {
+        const plants = parseCsv(csvText);
+        if (plants.length === 0) {
+          showToast("Le fichier CSV semble vide ou invalide.");
+          return;
+        }
+
+        state.plants = plants;
+        state.sourceName = sourceLabel;
+        loadFavorites();
+
+        el.sourceBadge.textContent = sourceLabel;
+        el.sourceBadge.classList.remove("hidden");
+        el.toggleFavFilterBtn.classList.remove("hidden");
+        el.shareFavBtn.classList.remove("hidden");
+        el.loaderPanel.classList.add("hidden");
+        el.appContent.classList.remove("hidden");
+
+        populateDynamicFilters();
+        updateFavControls();
+        renderTableHead();
+        renderRows();
+      }
+
+      async function boot() {
+        checkSharedFavoritesInUrl();
+        const urlTarget = resolveCsvTargetFromUrl();
+
+        if (urlTarget.invalid) {
+          el.loaderPanel.classList.remove("hidden");
+          el.loaderMessage.textContent = `Le paramètre de fichier "${urlTarget.requested}" n'est pas autorisé.`;
+          return;
+        }
+
+        try {
+          const response = await fetch(urlTarget.target, { cache: "no-cache" });
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          const text = await response.text();
+          loadCsvContent(text, urlTarget.target);
+        } catch {
+          el.loaderPanel.classList.remove("hidden");
+          el.loaderMessage.innerHTML = `Impossible de charger automatiquement <strong>${escapeHtml(urlTarget.target)}</strong>.<br>Sélectionnez ou glissez votre fichier CSV ci-dessous.`;
+        }
+      }
+
+      el.csvFileInput.addEventListener("change", async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const text = await file.text();
+        loadCsvContent(text, file.name);
+        e.target.value = "";
+        showToast(`Fichier "${file.name}" chargé`);
+      });
+
+      ["dragenter", "dragover"].forEach(evt => {
+        el.loaderPanel.addEventListener(evt, (e) => {
+          e.preventDefault();
+          el.loaderPanel.classList.add("drag-over");
+        });
+      });
+
+      ["dragleave", "drop"].forEach(evt => {
+        el.loaderPanel.addEventListener(evt, (e) => {
+          e.preventDefault();
+          el.loaderPanel.classList.remove("drag-over");
+        });
+      });
+
+      el.loaderPanel.addEventListener("drop", async (e) => {
+        const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if (!file) return;
+        const text = await file.text();
+        loadCsvContent(text, file.name);
+        showToast(`Fichier "${file.name}" chargé`);
+      });
+
+      el.toggleFavFilterBtn.addEventListener("click", () => {
+        state.onlyFavorites = !state.onlyFavorites;
+        updateFavControls();
+        renderRows();
+      });
+
+      el.shareFavBtn.addEventListener("click", async () => {
+        const ids = [...activeFavSet()];
+        if (ids.length === 0) {
+          showToast("Ajoutez d'abord au moins une plante en favori (☆).");
+          return;
+        }
+        const url = new URL(window.location.href);
+        if (state.sourceName && state.sourceName !== "plantes.csv" && !state.sourceName.includes("\\")) {
+          url.searchParams.set("csv", state.sourceName);
+        } else {
+          url.searchParams.delete("csv");
+        }
+        url.searchParams.set("fav", ids.join(","));
+
+        try {
+          await navigator.clipboard.writeText(url.toString());
+          showToast(`Lien copié (${ids.length} favori${ids.length > 1 ? "s" : ""}) !`);
+        } catch {
+          window.prompt("Copiez ce lien pour partager vos favoris :", url.toString());
+        }
+      });
+
+      el.importSharedBtn.addEventListener("click", () => {
+        if (!state.sharedFavorites) return;
+        state.sharedFavorites.forEach(id => state.favorites.add(id));
+        saveFavorites();
+        state.sharedFavorites = null;
+        el.sharedBanner.classList.add("hidden");
+        updateFavControls();
+        renderRows();
+        showToast("Sélection ajoutée à vos favoris !");
+      });
+
+      el.exitSharedBtn.addEventListener("click", () => {
+        state.sharedFavorites = null;
+        state.onlyFavorites = false;
+        el.sharedBanner.classList.add("hidden");
+        updateFavControls();
+        renderRows();
+      });
+
+      [el.searchInput, el.monthFilter, el.actionFilter, el.familyFilter, el.classFilter, el.cultureFilter].forEach(ctrl => {
+        ctrl.addEventListener("input", renderRows);
+        ctrl.addEventListener("change", renderRows);
+      });
+
+      el.resetFiltersBtn.addEventListener("click", () => {
+        el.searchInput.value = "";
+        el.monthFilter.value = "";
+        el.actionFilter.value = "";
+        el.familyFilter.value = "";
+        el.classFilter.value = "";
+        el.cultureFilter.value = "";
+        state.onlyFavorites = false;
+        updateFavControls();
+        renderRows();
+      });
+
+      el.modalCloseBtn.addEventListener("click", () => el.plantModal.close());
+      el.plantModal.addEventListener("click", (e) => {
+        if (e.target === el.plantModal) el.plantModal.close();
+      });
+
+      boot();
+    })();
+  </script>
+</body>
+</html>
