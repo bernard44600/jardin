@@ -260,7 +260,7 @@
       background: #274434;
       color: #fff;
       font-weight: 600;
-      padding: 9px 6px;
+      padding: 7px 3px;
       text-align: center;
       border-bottom: 2px solid #1a2f24;
       border-right: 1px solid rgba(255, 255, 255, 0.12);
@@ -281,10 +281,16 @@
       box-shadow: inset 0 -3px 0 #8bd4a6;
     }
 
+    thead th.col-fav {
+      width: 24px;
+      padding: 7px 1px;
+    }
+
     thead th.col-plant {
       text-align: left;
-      padding-left: 10px;
-      min-width: 210px;
+      padding-left: 6px;
+      padding-right: 4px;
+      min-width: 170px;
     }
 
     .sort-arrow {
@@ -309,7 +315,7 @@
     tbody td {
       border-bottom: 1px solid var(--border);
       border-right: 1px solid #ecefe6;
-      padding: 5px 4px;
+      padding: 4px 2px;
       vertical-align: middle;
       text-align: center;
     }
@@ -319,17 +325,17 @@
     }
 
     tbody td.col-fav {
-      width: 38px;
-      padding: 4px;
+      width: 24px;
+      padding: 3px 1px;
     }
 
     .fav-btn {
       background: none;
       border: none;
       cursor: pointer;
-      font-size: 1.25rem;
+      font-size: 1.1rem;
       line-height: 1;
-      padding: 4px;
+      padding: 2px 1px;
       color: #b7c1b3;
       border-radius: 6px;
       transition: transform 0.12s, color 0.12s;
@@ -346,7 +352,7 @@
 
     td.col-plant {
       text-align: left;
-      padding: 6px 10px;
+      padding: 4px 6px;
     }
 
     .plant-title-row {
@@ -413,23 +419,34 @@
       font-size: 0.78rem;
       color: var(--text-muted);
       white-space: nowrap;
-      padding: 4px 6px;
+      padding: 3px 4px;
+    }
+
+    .col-variete {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      text-align: left;
+      padding: 3px 6px;
+      min-width: 130px;
+      max-width: 210px;
+      white-space: normal;
+      line-height: 1.25;
     }
 
     .col-needs {
       font-size: 0.8rem;
       white-space: nowrap;
-      padding: 4px 5px;
+      padding: 3px 4px;
     }
 
     /* Mois compactés */
     thead th.col-month {
-      padding: 5px 2px;
+      padding: 5px 1px;
       font-size: 0.75rem;
     }
     .col-month {
-      width: 22px;
-      min-width: 20px;
+      width: 21px;
+      min-width: 19px;
       padding: 2px 1px;
     }
 
@@ -518,6 +535,24 @@
       font-size: 0.82rem;
       color: var(--text-muted);
       margin-top: 2px;
+    }
+
+    .modal-head-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .modal-nav-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .modal-nav-pos {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      white-space: nowrap;
     }
 
     .modal-body {
@@ -684,7 +719,7 @@
         min-width: 0;
       }
       .container {
-        padding: 8px 8px 24px;
+        padding: 6px 4px 20px;
       }
       .controls-card {
         padding: 10px;
@@ -695,8 +730,70 @@
         padding: 5px 7px;
         font-size: 0.84rem;
       }
+      thead th {
+        padding: 5px 2px;
+        font-size: 0.72rem;
+      }
+      tbody td {
+        padding: 3px 1.5px;
+      }
+      thead th.col-fav,
+      tbody td.col-fav {
+        width: 18px;
+        min-width: 18px;
+        padding: 2px 0;
+      }
+      .fav-btn {
+        font-size: 0.95rem;
+        padding: 1px 0;
+      }
       thead th.col-plant {
-        min-width: 155px;
+        min-width: 98px;
+        max-width: 128px;
+        padding: 5px 3px;
+      }
+      td.col-plant {
+        min-width: 98px;
+        max-width: 128px;
+        padding: 3px 3px;
+      }
+      .plant-name-btn {
+        font-size: 0.8rem;
+        line-height: 1.15;
+      }
+      .plant-sub {
+        font-size: 0.66rem;
+        gap: 3px;
+      }
+      .tag {
+        font-size: 0.64rem;
+        padding: 0 4px;
+      }
+      thead th.col-month {
+        padding: 4px 0.5px;
+        font-size: 0.68rem;
+      }
+      .col-month {
+        width: 16px;
+        min-width: 15px;
+        padding: 2px 0.5px;
+      }
+      .slot {
+        width: 14px;
+        height: 13px;
+        line-height: 13px;
+        font-size: 0.58rem;
+      }
+      .col-meta,
+      .col-needs,
+      .col-durations {
+        padding: 2px 3px;
+      }
+      .col-variete {
+        padding: 2px 4px;
+        font-size: 0.7rem;
+        min-width: 110px;
+        max-width: 160px;
       }
       dialog.plant-modal {
         width: 96vw;
@@ -713,9 +810,15 @@
       .modal-subtitle {
         font-size: 0.74rem;
       }
+      .modal-head-actions {
+        gap: 4px;
+      }
+      .modal-nav-pos {
+        font-size: 0.7rem;
+      }
       .modal-head .btn {
-        padding: 5px 8px;
-        font-size: 0.78rem;
+        padding: 4px 6px;
+        font-size: 0.76rem;
       }
       .modal-body {
         padding: 8px 10px 10px;
@@ -806,7 +909,7 @@
 
         <!-- Recherche globale -->
         <div class="field-search">
-          <input id="searchInput" type="search" placeholder="Recherche: Nom, famille, notes, culture...">
+          <input id="searchInput" type="search" placeholder="Recherche: Nom, famille, notes, culture (ex: « ail » pour mot exact)..." title="Astuce : ajoutez un espace devant ou derrière un mot (ex. « ail ») pour rechercher le mot exact.">
         </div>
 
         <!-- Ligne 1 : Mois + Action + Classement + Bouton Tout -->
@@ -868,7 +971,10 @@
         <h2 id="modalTitle"></h2>
         <div id="modalSubtitle" class="modal-subtitle"></div>
       </div>
-      <div style="display:flex; gap:8px; align-items:center;">
+      <div class="modal-head-actions">
+        <button id="modalPrevBtn" class="btn modal-nav-btn" type="button" title="Plante précédente" aria-label="Plante précédente">◀</button>
+        <span id="modalNavPos" class="modal-nav-pos"></span>
+        <button id="modalNextBtn" class="btn modal-nav-btn" type="button" title="Plante suivante" aria-label="Plante suivante">▶</button>
         <button id="modalFavBtn" class="btn" type="button"></button>
         <button id="modalCloseBtn" class="btn" type="button" aria-label="Fermer">✕</button>
       </div>
@@ -906,6 +1012,7 @@
 
       const state = {
         plants: [],
+        filteredPlants: [],
         sourceName: "plantes.csv",
         favorites: new Set(),
         sharedFavorites: null,
@@ -940,6 +1047,9 @@
         plantModal: document.getElementById("plantModal"),
         modalTitle: document.getElementById("modalTitle"),
         modalSubtitle: document.getElementById("modalSubtitle"),
+        modalPrevBtn: document.getElementById("modalPrevBtn"),
+        modalNavPos: document.getElementById("modalNavPos"),
+        modalNextBtn: document.getElementById("modalNextBtn"),
         modalFavBtn: document.getElementById("modalFavBtn"),
         modalCloseBtn: document.getElementById("modalCloseBtn"),
         modalBody: document.getElementById("modalBody"),
@@ -1235,8 +1345,26 @@
           classes.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
       }
 
+      function buildSearchMatcher(rawValue) {
+        const raw = stripAccents(rawValue).toLowerCase();
+        const term = raw.trim().replace(/\s+/g, " ");
+        if (!term) return null;
+        const leadBoundary = /^\s/.test(raw);
+        const trailBoundary = /\s$/.test(raw);
+        if (!leadBoundary && !trailBoundary) {
+          return text => text.includes(term);
+        }
+        const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const pattern =
+          (leadBoundary ? "(?:^|[^a-z0-9])" : "") +
+          escaped +
+          (trailBoundary ? "(?:$|[^a-z0-9])" : "");
+        const re = new RegExp(pattern);
+        return text => re.test(text);
+      }
+
       function getFilteredPlants() {
-        const q = normKey(el.searchInput.value);
+        const matchSearch = buildSearchMatcher(el.searchInput.value);
         const monthVal = el.monthFilter.value;
         const monthIdx = monthVal === "current"
           ? state.currentMonthIndex
@@ -1249,7 +1377,7 @@
 
         return state.plants.filter(p => {
           if (state.onlyFavorites && !favSet.has(String(p.id))) return false;
-          if (q && !p._search.includes(q)) return false;
+          if (matchSearch && !matchSearch(p._search)) return false;
           if (familyVal && p.famille !== familyVal) return false;
           if (classVal && p.classement !== classVal) return false;
 
@@ -1327,15 +1455,16 @@
       function renderTableHead() {
         const arrow = key => state.sortKey === key ? `<span class="sort-arrow">${state.sortDir === "asc" ? "▲" : "▼"}</span>` : "";
 
-        let html = `<th class="sortable" data-sort="fav" title="Trier par favoris">★${arrow("fav")}</th>`;
+        let html = `<th class="sortable col-fav" data-sort="fav" title="Trier par favoris">★${arrow("fav")}</th>`;
         html += `<th class="sortable col-plant" data-sort="nom" title="Trier par nom">Plante${arrow("nom")}</th>`;
 
-        // Colonnes mois placées entre "Plante" et "Famille"
+        // Colonnes mois placées entre "Plante" et "Variétés"
         MONTHS_SHORT.forEach((m, idx) => {
           const isCur = idx === state.currentMonthIndex;
           html += `<th class="col-month ${isCur ? "current-month" : ""}" title="${MONTHS_FULL[idx]}">${m}</th>`;
         });
 
+        html += `<th class="sortable col-variete" data-sort="variete" title="Trier par variété">Variétés${arrow("variete")}</th>`;
         html += `<th class="sortable" data-sort="famille" title="Trier par famille">Famille${arrow("famille")}</th>`;
         html += `<th class="sortable" data-sort="besoins_eau" title="Trier par besoin en eau">💧${arrow("besoins_eau")}</th>`;
         html += `<th class="sortable" data-sort="besoins_nutriments" title="Trier par besoin en nutriments">⚡${arrow("besoins_nutriments")}</th>`;
@@ -1378,13 +1507,14 @@
 
       function renderRows() {
         const filtered = sortPlants(getFilteredPlants());
+        state.filteredPlants = filtered;
         const favSet = activeFavSet();
         el.resultCount.textContent = `${filtered.length} / ${state.plants.length} plantes`;
 
         updateActiveStyles();
 
         if (filtered.length === 0) {
-          el.tableBody.innerHTML = `<tr><td colspan="20" class="empty-state">Aucune plante ne correspond aux filtres sélectionnés.</td></tr>`;
+          el.tableBody.innerHTML = `<tr><td colspan="21" class="empty-state">Aucune plante ne correspond aux filtres sélectionnés.</td></tr>`;
           return;
         }
 
@@ -1395,9 +1525,6 @@
           const badges = [];
           if (p.culture) {
             badges.push(`<span class="tag ${isPerp ? "tag-perpetuel" : ""}">${escapeHtml(p.culture)}</span>`);
-          }
-          if (p.variete && p.variete !== "V") {
-            badges.push(`<span class="tag">${escapeHtml(p.variete)}</span>`);
           }
 
           const subParts = [];
@@ -1447,6 +1574,7 @@
                 <div class="plant-sub">${subParts.join(" · ")}</div>
               </td>
               ${monthsHtml}
+              <td class="col-variete">${p.variete && p.variete !== "V" ? escapeHtml(p.variete) : `<span style="opacity:.3">–</span>`}</td>
               <td class="col-meta">${p.famille ? escapeHtml(p.famille) : `<span style="opacity:.3">–</span>`}</td>
               <td class="col-needs">${renderNeedIcons(p.besoins_eau, "💧")}</td>
               <td class="col-needs">${renderNeedIcons(p.besoins_nutriments, "⚡")}</td>
@@ -1519,6 +1647,21 @@
       function openPlantModal(id) {
         const p = state.plants.find(x => String(x.id) === String(id));
         if (!p) return;
+
+        const navList = state.filteredPlants;
+        const navIdx = navList.findIndex(x => String(x.id) === String(p.id));
+        const prevPlant = navIdx > 0 ? navList[navIdx - 1] : null;
+        const nextPlant = navIdx !== -1 && navIdx < navList.length - 1 ? navList[navIdx + 1] : null;
+
+        el.modalPrevBtn.disabled = !prevPlant;
+        el.modalPrevBtn.title = prevPlant ? `Plante précédente : ${prevPlant.nom}` : "Aucune plante précédente";
+        el.modalPrevBtn.onclick = prevPlant ? () => openPlantModal(prevPlant.id) : null;
+
+        el.modalNextBtn.disabled = !nextPlant;
+        el.modalNextBtn.title = nextPlant ? `Plante suivante : ${nextPlant.nom}` : "Aucune plante suivante";
+        el.modalNextBtn.onclick = nextPlant ? () => openPlantModal(nextPlant.id) : null;
+
+        el.modalNavPos.textContent = navIdx !== -1 ? `${navIdx + 1}/${navList.length}` : "";
 
         const updateModalFav = () => {
           const isFav = activeFavSet().has(String(p.id));
@@ -1769,6 +1912,15 @@
       el.modalCloseBtn.addEventListener("click", () => el.plantModal.close());
       el.plantModal.addEventListener("click", (e) => {
         if (e.target === el.plantModal) el.plantModal.close();
+      });
+      el.plantModal.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft" && !el.modalPrevBtn.disabled) {
+          e.preventDefault();
+          el.modalPrevBtn.click();
+        } else if (e.key === "ArrowRight" && !el.modalNextBtn.disabled) {
+          e.preventDefault();
+          el.modalNextBtn.click();
+        }
       });
 
       boot();
